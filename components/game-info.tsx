@@ -6,6 +6,7 @@ import { usePubNubGame } from "@/lib/pubnub-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { PieceSymbol, Color } from "chess.js"
+import { Copy, Check, Share2, Link } from "lucide-react"
 
 const PIECE_UNICODE: Record<PieceSymbol, { w: string; b: string }> = {
   k: { w: "♔", b: "♚" },
@@ -34,8 +35,15 @@ export function GameInfo() {
   const pubnub = usePubNubGame()
   const [joinId, setJoinId] = useState("")
   const [showJoin, setShowJoin] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
 
   const hasPubNub = pubnub !== null
+  
+  const getShareUrl = () => {
+    if (typeof window === "undefined") return ""
+    return `${window.location.origin}?game=${gameId}`
+  }
 
   const handleReset = () => {
     resetGame()
@@ -47,6 +55,32 @@ export function GameInfo() {
   const handleCreateGame = () => {
     const id = createGame()
     navigator.clipboard?.writeText(id)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  
+  const handleCopyLink = () => {
+    const url = getShareUrl()
+    navigator.clipboard?.writeText(url)
+    setLinkCopied(true)
+    setTimeout(() => setLinkCopied(false), 2000)
+  }
+  
+  const handleShare = async () => {
+    const url = getShareUrl()
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join my Chess game!",
+          text: "Click the link to join my chess game",
+          url: url,
+        })
+      } catch {
+        handleCopyLink()
+      }
+    } else {
+      handleCopyLink()
+    }
   }
 
   const handleJoinGame = () => {
@@ -102,6 +136,21 @@ export function GameInfo() {
               {opponentConnected ? "Opponent connected" : "Waiting for opponent..."}
             </span>
           </div>
+          
+          {!opponentConnected && (
+            <div className="space-y-2 pt-2">
+              <p className="text-xs text-muted-foreground">Share this link to invite a friend:</p>
+              <div className="flex gap-2">
+                <Button onClick={handleCopyLink} size="sm" variant="outline" className="flex-1">
+                  {linkCopied ? <Check className="w-4 h-4 mr-1" /> : <Link className="w-4 h-4 mr-1" />}
+                  {linkCopied ? "Copied!" : "Copy Link"}
+                </Button>
+                <Button onClick={handleShare} size="sm" variant="outline">
+                  <Share2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -125,7 +174,8 @@ export function GameInfo() {
         {hasPubNub && !isMultiplayer && (
           <>
             <Button onClick={handleCreateGame} className="w-full">
-              Create Online Game
+              {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+              {copied ? "Game ID Copied!" : "Create Online Game"}
             </Button>
             
             {showJoin ? (
