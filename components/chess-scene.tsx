@@ -51,6 +51,14 @@ function ChessPiece({
   const meshRef = useRef<THREE.Group>(null)
   const targetY = useRef(position[1])
   
+  const material = useMemo(() => (
+    <meshStandardMaterial
+      color={PIECE_COLORS[color]}
+      metalness={color === "w" ? 0.1 : 0.3}
+      roughness={color === "w" ? 0.4 : 0.6}
+    />
+  ), [color])
+  
   useFrame((_, delta) => {
     if (meshRef.current) {
       if (isSelected) {
@@ -66,18 +74,6 @@ function ChessPiece({
     }
   })
 
-  const pieceHeight = useMemo(() => {
-    switch (type) {
-      case "k": return 1.2
-      case "q": return 1.1
-      case "r": return 0.7
-      case "b": return 0.9
-      case "n": return 0.8
-      case "p": return 0.6
-      default: return 0.6
-    }
-  }, [type])
-
   const pieceGeometry = useMemo(() => {
     switch (type) {
       case "k":
@@ -85,18 +81,23 @@ function ChessPiece({
           <group>
             <mesh position={[0, 0.2, 0]}>
               <cylinderGeometry args={[0.25, 0.35, 0.4, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.55, 0]}>
               <cylinderGeometry args={[0.18, 0.25, 0.5, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.9, 0]}>
               <cylinderGeometry args={[0.12, 0.18, 0.3, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 1.15, 0]}>
               <boxGeometry args={[0.08, 0.2, 0.08]} />
+              {material}
             </mesh>
             <mesh position={[0, 1.2, 0]}>
               <boxGeometry args={[0.2, 0.08, 0.08]} />
+              {material}
             </mesh>
           </group>
         )
@@ -105,15 +106,19 @@ function ChessPiece({
           <group>
             <mesh position={[0, 0.2, 0]}>
               <cylinderGeometry args={[0.25, 0.35, 0.4, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.55, 0]}>
               <cylinderGeometry args={[0.18, 0.25, 0.5, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.85, 0]}>
               <sphereGeometry args={[0.2, 16, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 1.05, 0]}>
               <sphereGeometry args={[0.08, 16, 16]} />
+              {material}
             </mesh>
           </group>
         )
@@ -122,12 +127,15 @@ function ChessPiece({
           <group>
             <mesh position={[0, 0.15, 0]}>
               <cylinderGeometry args={[0.22, 0.3, 0.3, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.4, 0]}>
               <cylinderGeometry args={[0.18, 0.22, 0.3, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.6, 0]}>
               <cylinderGeometry args={[0.22, 0.18, 0.15, 4]} />
+              {material}
             </mesh>
           </group>
         )
@@ -136,12 +144,15 @@ function ChessPiece({
           <group>
             <mesh position={[0, 0.15, 0]}>
               <cylinderGeometry args={[0.2, 0.3, 0.3, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.45, 0]}>
               <cylinderGeometry args={[0.08, 0.2, 0.4, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.75, 0]}>
               <sphereGeometry args={[0.12, 16, 16]} />
+              {material}
             </mesh>
           </group>
         )
@@ -150,12 +161,15 @@ function ChessPiece({
           <group>
             <mesh position={[0, 0.15, 0]}>
               <cylinderGeometry args={[0.2, 0.28, 0.3, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.4, 0.05]} rotation={[0.3, 0, 0]}>
               <boxGeometry args={[0.15, 0.4, 0.25]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.65, 0.15]} rotation={[0.8, 0, 0]}>
               <boxGeometry args={[0.12, 0.25, 0.15]} />
+              {material}
             </mesh>
           </group>
         )
@@ -164,9 +178,11 @@ function ChessPiece({
           <group>
             <mesh position={[0, 0.12, 0]}>
               <cylinderGeometry args={[0.15, 0.22, 0.24, 16]} />
+              {material}
             </mesh>
             <mesh position={[0, 0.35, 0]}>
               <sphereGeometry args={[0.15, 16, 16]} />
+              {material}
             </mesh>
           </group>
         )
@@ -174,21 +190,16 @@ function ChessPiece({
         return (
           <mesh>
             <sphereGeometry args={[0.3, 16, 16]} />
+            {material}
           </mesh>
         )
     }
-  }, [type])
+  }, [type, material])
 
   return (
     <group ref={meshRef} position={position}>
       <group scale={[0.9, 0.9, 0.9]}>
         {pieceGeometry}
-        <meshStandardMaterial
-          color={PIECE_COLORS[color]}
-          metalness={color === "w" ? 0.1 : 0.3}
-          roughness={color === "w" ? 0.4 : 0.6}
-          attach="material"
-        />
       </group>
     </group>
   )
