@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm install --legacy-peer-deps && next build",
     "start": "next start",
     "lint": "eslint ."
   },
@@ -37,5 +37,10 @@
     "postcss": "^8.5",
     "tailwindcss": "^4.2.0",
     "typescript": "5.7.3"
+  },
+  "overrides": {
+    "pubnub-react": {
+      "pubnub": "^11.0.1"
+    }
   }
 }
