@@ -1,29 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { ChessProvider, useChess } from "@/lib/chess-context"
-import { GamePubNubProvider } from "@/lib/pubnub-provider"
+import { useState } from "react"
+import { ChessProvider } from "@/lib/chess-context"
 import { ChessScene } from "@/components/chess-scene"
 import { ChessBoard2D } from "@/components/chess-board-2d"
 import { GameInfo } from "@/components/game-info"
 import { Button } from "@/components/ui/button"
 
 type ViewMode = "3d" | "2d"
-
-function GameJoiner() {
-  const searchParams = useSearchParams()
-  const { joinGame, isMultiplayer } = useChess()
-  
-  useEffect(() => {
-    const gameIdParam = searchParams.get("game")
-    if (gameIdParam && !isMultiplayer) {
-      joinGame(gameIdParam)
-    }
-  }, [searchParams, joinGame, isMultiplayer])
-  
-  return null
-}
 
 function ChessGameContent() {
   const [viewMode, setViewMode] = useState<ViewMode>("3d")
@@ -73,22 +57,14 @@ function ChessGameContent() {
       <footer className="border-t border-border px-4 py-2 text-center text-xs text-muted-foreground shrink-0">
         <p>Tap a piece to select, then tap a highlighted square to move</p>
       </footer>
-      
-      <GameJoiner />
     </div>
   )
 }
 
-import { Suspense } from "react"
-
 export function ChessGame() {
   return (
     <ChessProvider>
-      <GamePubNubProvider>
-        <Suspense fallback={null}>
-          <ChessGameContent />
-        </Suspense>
-      </GamePubNubProvider>
+      <ChessGameContent />
     </ChessProvider>
   )
 }

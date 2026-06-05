@@ -1,8 +1,7 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
 import { Chess, type Square, type Move, type PieceSymbol, type Color } from "chess.js"
-import { v4 as uuidv4 } from "uuid"
 
 export type GameState = {
   fen: string
@@ -21,18 +20,9 @@ export type ChessContextType = {
   gameState: GameState
   selectedSquare: Square | null
   validMoves: Square[]
-  playerColor: Color
-  gameId: string
-  isMultiplayer: boolean
-  opponentConnected: boolean
   selectSquare: (square: Square | null) => void
   makeMove: (from: Square, to: Square, promotion?: PieceSymbol) => boolean
   resetGame: () => void
-  setPlayerColor: (color: Color) => void
-  joinGame: (id: string) => void
-  createGame: () => string
-  setMultiplayerMove: (from: Square, to: Square, promotion?: PieceSymbol) => void
-  setOpponentConnected: (connected: boolean) => void
 }
 
 const ChessContext = createContext<ChessContextType | null>(null)
@@ -45,7 +35,7 @@ export function useChess() {
   return context
 }
 
-function getGameState(game: Chess, prevCaptured?: { white: PieceSymbol[]; black: PieceSymbol[] }): GameState {
+function getGameState(game: Chess): GameState {
   const history = game.history({ verbose: true })
   const capturedPieces = { white: [] as PieceSymbol[], black: [] as PieceSymbol[] }
   
@@ -77,10 +67,6 @@ export function ChessProvider({ children }: { children: ReactNode }) {
   const [gameState, setGameState] = useState<GameState>(() => getGameState(game))
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null)
   const [validMoves, setValidMoves] = useState<Square[]>([])
-  const [playerColor, setPlayerColor] = useState<Color>("w")
-  const [gameId, setGameId] = useState(() => uuidv4().slice(0, 8))
-  const [isMultiplayer, setIsMultiplayer] = useState(false)
-  const [opponentConnected, setOpponentConnected] = useState(false)
 
   const selectSquare = useCallback(
     (square: Square | null) => {
@@ -97,9 +83,6 @@ export function ChessProvider({ children }: { children: ReactNode }) {
       }
 
       if (piece && piece.color === game.turn()) {
-        if (isMultiplayer && piece.color !== playerColor) {
-          return
-        }
         setSelectedSquare(square)
         const moves = game.moves({ square, verbose: true })
         setValidMoves(moves.map((m) => m.to))
@@ -108,16 +91,12 @@ export function ChessProvider({ children }: { children: ReactNode }) {
         setValidMoves([])
       }
     },
-    [game, selectedSquare, validMoves, isMultiplayer, playerColor]
+    [game, selectedSquare, validMoves]
   )
 
   const makeMove = useCallback(
     (from: Square, to: Square, promotion?: PieceSymbol): boolean => {
       try {
-        if (isMultiplayer && game.turn() !== playerColor) {
-          return false
-        }
-
         const move = game.move({ from, to, promotion: promotion || "q" })
         if (move) {
           setGameState(getGameState(game))
@@ -130,22 +109,6 @@ export function ChessProvider({ children }: { children: ReactNode }) {
       }
       return false
     },
-    [game, isMultiplayer, playerColor]
-  )
-
-  const setMultiplayerMove = useCallback(
-    (from: Square, to: Square, promotion?: PieceSymbol) => {
-      try {
-        const move = game.move({ from, to, promotion: promotion || "q" })
-        if (move) {
-          setGameState(getGameState(game))
-          setSelectedSquare(null)
-          setValidMoves([])
-        }
-      } catch {
-        // Invalid move from network
-      }
-    },
     [game]
   )
 
@@ -156,21 +119,6 @@ export function ChessProvider({ children }: { children: ReactNode }) {
     setValidMoves([])
   }, [game])
 
-  const createGame = useCallback(() => {
-    const newId = uuidv4().slice(0, 8)
-    setGameId(newId)
-    setIsMultiplayer(true)
-    setPlayerColor("w")
-    resetGame()
-    return newId
-  }, [resetGame])
-
-  const joinGame = useCallback((id: string) => {
-    setGameId(id)
-    setIsMultiplayer(true)
-    setPlayerColor("b")
-  }, [])
-
   return (
     <ChessContext.Provider
       value={{
@@ -178,18 +126,9 @@ export function ChessProvider({ children }: { children: ReactNode }) {
         gameState,
         selectedSquare,
         validMoves,
-        playerColor,
-        gameId,
-        isMultiplayer,
-        opponentConnected,
         selectSquare,
         makeMove,
         resetGame,
-        setPlayerColor,
-        joinGame,
-        createGame,
-        setMultiplayerMove,
-        setOpponentConnected,
       }}
     >
       {children}
