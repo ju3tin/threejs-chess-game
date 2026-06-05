@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "npm install --legacy-peer-deps && next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "next lint"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -20,8 +20,8 @@
     "next": "16.2.6",
     "pubnub": "^11.0.1",
     "pubnub-react": "^3.0.2",
-    "react": "^19",
-    "react-dom": "^19",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "tailwind-merge": "^3.3.1",
     "three": "^0.184.0",
     "uuid": "^14.0.0"
